@@ -191,7 +191,7 @@ let CLOUD_URL=localStorage.getItem('lc_cloud_url')||'';
 let _cloudSaving=false;
 let _cloudAutoTimer=null;
 let _lastCloudItemCount=-1; // -1 = chưa load từ cloud lần nào
-let _blockAutoCloud=false;  // true sau khi xóa data → không auto-push
+let _blockAutoCloud=true;   // block cho đến khi bgLoadCloud xong lần đầu
 
 function _countDBItems(){
   return (DB.budgetCodes||[]).length+(DB.detailLines||[]).length+(DB.torrTrinh||[]).length;
@@ -261,9 +261,10 @@ async function loadFromCloud(silent){
 
 // Gọi khi khởi động app — load cloud ngầm sau khi IDB đã hiển thị
 async function bgLoadCloud(){
-  if(!CLOUD_URL)return;
+  if(!CLOUD_URL){_blockAutoCloud=false;return;}
   await new Promise(r=>setTimeout(r,1500)); // đợi IDB render xong trước
   await loadFromCloud(true); // silent=true, không hỏi confirm, không báo lỗi
+  _blockAutoCloud=false; // mở auto-save sau khi cloud load xong (dù thành công hay lỗi)
 }
 function openCloudSettings(){
   const isNew=!CLOUD_URL;
