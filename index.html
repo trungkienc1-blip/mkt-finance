@@ -742,8 +742,9 @@ function renderDashboard(m,y){
   // Resolve which months to include
   const dashMonths=resolveMonthFilter(dashSm,m); // null=all, array=specific months
   // budgetCodes & torrTrinh dùng field month/year; detailLines dùng importMonth/importYear
-  const allBCs=DB.budgetCodes.filter(b=>b.year===+y);
-  const allDLs=DB.detailLines.filter(d=>d.importYear===+y);
+  // Exclude carryForward items — chỉ hiện ở tab Theo dõi, không ảnh hưởng KPI dashboard
+  const allBCs=DB.budgetCodes.filter(b=>b.year===+y&&!b.carryForward);
+  const allDLs=DB.detailLines.filter(d=>d.importYear===+y&&!d.carryForward);
   let bcs=dashMonths?allBCs.filter(b=>dashMonths.includes(b.month)):allBCs;
   const tts=dashMonths?DB.torrTrinh.filter(t=>t.year===+y&&dashMonths.includes(t.month)):DB.torrTrinh.filter(t=>t.year===+y);
   if(dashFilter.ttIds.size)bcs=bcs.filter(b=>dashFilter.ttIds.has(b.ttId));
