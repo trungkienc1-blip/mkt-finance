@@ -261,10 +261,11 @@ async function loadFromCloud(silent){
 
 // Gọi khi khởi động app — load cloud ngầm sau khi IDB đã hiển thị
 async function bgLoadCloud(){
-  if(!CLOUD_URL){_blockAutoCloud=false;return;}
+  if(!CLOUD_URL){_blockAutoCloud=false;updateSbInfo();return;}
   await new Promise(r=>setTimeout(r,1500)); // đợi IDB render xong trước
-  await loadFromCloud(true); // silent=true, không hỏi confirm, không báo lỗi
-  _blockAutoCloud=false; // mở auto-save sau khi cloud load xong (dù thành công hay lỗi)
+  await loadFromCloud(true); // silent=true — nếu thành công sẽ set _blockAutoCloud=false bên trong
+  _blockAutoCloud=false; // đảm bảo unblock dù cloud load thất bại
+  updateSbInfo();         // cập nhật sidebar status "BẬT/TẮT"
 }
 function openCloudSettings(){
   const isNew=!CLOUD_URL;
