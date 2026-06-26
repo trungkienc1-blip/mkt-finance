@@ -434,12 +434,12 @@ function initSampleData(){
 // ═══ IMPORT SỐ DƯ ĐẦU KỲ ════════════════════════════════
 function _cfHeaders(type){
   return type==='accrual'
-    ?['Tên chương trình *','Tháng (1-12) *','Số tiền trích trước *','Số đã hoàn nhập (để 0 nếu chưa)','Ngày trích trước (dd/mm/yyyy)','Ghi chú']
+    ?['Tên chương trình *','Tên NCC (Nhà cung cấp)','Tháng (1-12) *','Số tiền trích trước *','Số đã hoàn nhập (để 0 nếu chưa)','Ngày trích trước (dd/mm/yyyy)','Ghi chú']
     :['Tên hãng / mô tả *','Tháng (1-12) *','Số tiền hợp đồng *','Trạng thái AR (pending/invoiced/collected)','Số hóa đơn (nếu có)','Ghi chú'];
 }
 function _cfSample(type){
   return type==='accrual'
-    ?[['In ấn POSM T01',1,450000000,0,'15/01/2026',''],['Digital Ads T03',3,250000000,150000000,'10/03/2026','HN 1 phần']]
+    ?[['In ấn POSM T01','Công ty In XYZ',1,450000000,0,'15/01/2026',''],['Digital Ads T03','Meta Platforms',3,250000000,150000000,'10/03/2026','HN 1 phần']]
     :[['Vinamilk',2,1200000000,'pending','',''],['Abbott',4,800000000,'invoiced','HD-2026-001','']];
 }
 
@@ -543,16 +543,17 @@ function doCarryForwardImport(type){
   if(type==='accrual'){
     _cfRows.forEach((r,i)=>{
       const chuongTrinh=String(r[0]||'').trim();
-      const mo=parseInt(r[1])||1;
-      const chiPhi=_parseAmt(r[2]);
+      const nhaCungCap=String(r[1]||'').trim();   // cột 2: NCC
+      const mo=parseInt(r[2])||1;                  // cột 3: tháng
+      const chiPhi=_parseAmt(r[3]);               // cột 4: số tiền TT
       if(!chiPhi){skipped++;return;}
-      const revAmt=_parseAmt(r[3]||0);
-      const accrualDate=_parseDate(r[4]||'');
-      const note=String(r[5]||'').trim();
+      const revAmt=_parseAmt(r[4]||0);            // cột 5: đã HN
+      const accrualDate=_parseDate(r[5]||'');     // cột 6: ngày trích
+      const note=String(r[6]||'').trim();          // cột 7: ghi chú
       const isFull=revAmt>=chiPhi*0.99;
       DB.detailLines.push({
         id:'CF-ACC-'+Date.now()+'-'+i,bcId:null,ttId:null,pic:'',maShop:'',
-        chiPhi,chuongTrinh,trichTruoc:'N',soHoaDon:'',kyHieu:'',
+        chiPhi,chuongTrinh,nhaCungCap,trichTruoc:'N',soHoaDon:'',kyHieu:'',
         maSoThueNCC:'',tenShop:'',nhom:'',
         importMonth:mo,importYear:+y,
         matchedInvoice:'',matchAmountOk:false,
